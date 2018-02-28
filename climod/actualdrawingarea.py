@@ -26,13 +26,10 @@ class ActualDrawingArea(Frame):
 
     def start_search(self):
         self.__detail.clear_prices()
+
         sitem = self.__search.get_value()
-        l, h = PricesGetter.parse_tb(sitem)
-        self.__detail.add_price("淘宝", str(l) + "-" + str(h), "s.taobao.com")
-        l, h = PricesGetter.parse_jd(sitem)
-        self.__detail.add_price("京东", str(l) + "-" + str(h), "search.jd.com")
-        l, h = PricesGetter.parse_dd(sitem)
-        self.__detail.add_price("当当", str(l) + "-" + str(h), "search.dangdang.com")
+        for platform, prices, link in self.__price_getter.get_prices(sitem):
+            self.__detail.add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
 
         if not self.__search_panel_status == type(self).VISIBLE:
             self.__search_panel_status = type(self).VISIBLE
