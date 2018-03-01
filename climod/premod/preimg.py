@@ -18,8 +18,6 @@ class PreviewImages(Frame):
         image = PhotoImage(width=type(self).IMG_WIDTH, height=type(self).IMG_HEIGHT)
         self.__img_label = Label(self, image=image)
         self.__img_label.image = image
-        # TODO: delete this test code
-        self.load("resource/test.jpg")
 
     def __place_widgets(self):
         assert self.__img_label is not None

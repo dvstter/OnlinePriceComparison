@@ -19,7 +19,8 @@ class PreviewArea(Frame):
         self.__place_widgets()
 
     def load_preview_photo(self, path):
-        self.__images.load(path)
+        #self.__images.load(path)
+        self.__images.load("resource/test.jpg")
 
     def set_lowest_price(self, price):
         self.__short_info.set_lowest_price(price)
