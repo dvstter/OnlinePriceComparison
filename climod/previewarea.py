@@ -18,6 +18,12 @@ class PreviewArea(Frame):
         self.__create_widgets()
         self.__place_widgets()
 
+    def load_preview_photo(self, path):
+        self.__images.load(path)
+
+    def set_lowest_price(self, price):
+        self.__short_info.set_lowest_price(price)
+
     def __create_widgets(self):
         self.__images = PreviewImages(self)
         self.__short_info = ShortInfo(self)

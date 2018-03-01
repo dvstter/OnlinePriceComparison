@@ -28,8 +28,12 @@ class ActualDrawingArea(Frame):
         self.__detail.clear_prices()
 
         sitem = self.__search.get_value()
+        lowest_price = 100000000
         for platform, prices, link in self.__price_getter.get_prices(sitem):
             self.__detail.add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
+            lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
+
+        self.__preview.set_lowest_price(lowest_price)
 
         if not self.__search_panel_status == type(self).VISIBLE:
             self.__search_panel_status = type(self).VISIBLE
