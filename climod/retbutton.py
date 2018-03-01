@@ -38,12 +38,12 @@ class ReturnButtonFrame(Frame):
 
     def __mouse_callback(self, event):
         if event.type == EventType.Enter:
-            self.__change_button_image("retbutton2.png")
+            self.__change_button_image("resource/retbutton2.png")
         elif event.type == EventType.Leave:
-            self.__change_button_image("retbutton1.png")
+            self.__change_button_image("resource/retbutton1.png")
 
     def __create_widgets(self):
-        self.__init_image_button("retbutton1.png")
+        self.__init_image_button("resource/retbutton1.png")
 
     def __place_widgets(self):
         self.__image_button.grid(row=0, column=0, sticky="we")
