@@ -2,6 +2,7 @@ from tkinter.ttk import *
 from .detmod.prices import PricesTable
 from .detmod.curve import PriceCurve
 from .detmod.comments import Comments
+from .keymod.getprices import PricesGetter
 
 class DetailArea(Frame):
     def __init__(self, master=None):
@@ -15,13 +16,24 @@ class DetailArea(Frame):
         self.__curve = None
         self.__comments = None
 
+        self.__price_getter = PricesGetter()
+
         self.__create_widgets()
         self.__place_widgets()
 
-    def add_price(self, platform, price, link):
+    def update_view(self, item):
+        self.__clear_prices()
+        lowest_price = 100000
+        for platform, prices, link in self.__price_getter.get_prices(item):
+            self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
+            lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
+
+        return lowest_price
+
+    def __add_price(self, platform, price, link):
         self.__prices.add_price(platform, price, link)
 
-    def clear_prices(self):
+    def __clear_prices(self):
         self.__prices.clear_table()
 
     def __create_widgets(self):

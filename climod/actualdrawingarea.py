@@ -3,7 +3,6 @@ from .searcharea import SearchArea
 from .detailarea import DetailArea
 from .previewarea import PreviewArea
 from .retbutton import ReturnButtonFrame
-from .keymod.getprices import PricesGetter
 
 class ActualDrawingArea(Frame):
     VISIBLE = 1
@@ -19,21 +18,14 @@ class ActualDrawingArea(Frame):
         self.__ret_button = None
 
         self.__search_panel_status = type(self).HIDDEN
-        self.__price_getter = PricesGetter()
 
         self.__create_widgets()
         self.__place_widgets()
 
     def start_search(self):
-        self.__detail.clear_prices()
-
-        sitem = self.__search.get_value()
-        lowest_price = 100000000
-        for platform, prices, link in self.__price_getter.get_prices(sitem):
-            self.__detail.add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
-            lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
-
-        self.__preview.set_lowest_price(lowest_price)
+        item = self.__search.get_value()
+        lowest_price = self.__detail.update_view(item)
+        self.__preview.update_view(item, lowest_price)
 
         if not self.__search_panel_status == type(self).VISIBLE:
             self.__search_panel_status = type(self).VISIBLE
