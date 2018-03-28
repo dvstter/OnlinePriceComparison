@@ -4,8 +4,12 @@ from bs4 import BeautifulSoup
 class Tools:
 
     @staticmethod
-    def debug(resp):
-        f = open("debug.txt", "w", encoding="utf-8")
+    def debug(resp, filename=None):
+        if filename is None:
+            filename = "debug.txt"
+
+        f = open(filename, "w", encoding="utf-8")
+
         f.write(resp.text)
         f.close()
 
