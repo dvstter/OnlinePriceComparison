@@ -3,6 +3,7 @@ import requests
 import re
 from .tools import Tools
 
+# 价格获取器
 class PricesGetter:
     def __init__(self):
         requests.packages.urllib3.disable_warnings()
@@ -10,6 +11,7 @@ class PricesGetter:
         self.supported = {"jd":"京东", "tb":"淘宝", "dd":"当当", "tm":"天猫", "ymx":"亚马逊"}
 
     def get_prices(self, item):
+        # 依次调用parse_jd()、parse_tb()等方法，从对应的电商网站上获取价格数据
         for func, platform in self.supported.items():
             f = getattr(type(self), "parse_" + func)
             url, payload, prices = f(item)

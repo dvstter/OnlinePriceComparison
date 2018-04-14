@@ -1,5 +1,6 @@
 from tkinter import *
 
+# 评论展示区域，尚未实现
 class Comments(Frame):
     def __init__(self, master):
         super().__init__(master)

@@ -1,5 +1,6 @@
 from tkinter import *
 
+# 预览区域的详细信息展示类，尚未实现
 class DetailInfo(Frame):
     def __init__(self, master=None):
         super().__init__(master)

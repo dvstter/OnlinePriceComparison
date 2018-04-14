@@ -1,17 +1,19 @@
 from tkinter import *
 from tkinter.ttk import *
 
+# 平台价格展示区域，为一个表状
 class PricesTable(Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.grid()
 
-        self.__table = None
+        self.__table = None # 价格表，四列，分别为编号、电商平台名、价格区间、链接
         self.__data = []
 
         self.__create_widgets()
         self.__place_widgets()
 
+    # 给定平台、价格及链接，向表中添加一项价格
     def add_price(self, platform, price, link):
         self.__data += [[platform, price, link]]
 
@@ -22,6 +24,7 @@ class PricesTable(Frame):
             self.__table.insert("", "end", values=(str(idx + 1), self.__data[idx][0], self.__data[idx][1], self.__data[idx][2]))
         self.__place_widgets()
 
+    # 清空表的所有内容
     def clear_table(self):
         self.__data = []
         self.__init_table()

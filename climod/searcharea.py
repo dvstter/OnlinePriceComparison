@@ -1,5 +1,6 @@
 from tkinter import *
 
+# 搜索区域类
 class SearchArea(Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -7,8 +8,8 @@ class SearchArea(Frame):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.__input = None
-        self.__confirm = None
+        self.__input = None # 输入框控件
+        self.__confirm = None # 确定按钮
         self.__parent = master
 
         self.__create_widgets()

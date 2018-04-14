@@ -1,5 +1,6 @@
 from tkinter import *
 
+# 预览图的简要信息展示区域，目前仅支持最低价格展示
 class ShortInfo(Frame):
     def __init__(self, master=None):
         super().__init__(master)

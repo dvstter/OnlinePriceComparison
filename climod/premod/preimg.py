@@ -1,7 +1,9 @@
 from tkinter import *
 from PIL import Image, ImageTk
 
+# 预览区域的预览图控件
 class PreviewImages(Frame):
+    # 预览图的大小，为类对象
     IMG_WIDTH = 250
     IMG_HEIGHT = 250
 
@@ -24,6 +26,7 @@ class PreviewImages(Frame):
 
         self.__img_label.grid(row=0, column=0)
 
+    # 加载一张预览图，filename为图片的存放地址
     def load(self, filename):
         image = Image.open(filename)
         image = type(self).zoom_photo(image)
@@ -31,6 +34,7 @@ class PreviewImages(Frame):
         self.__img_label.configure(image=image, width=type(self).IMG_WIDTH, height=type(self).IMG_HEIGHT)
         self.__img_label.image = image
 
+    # 对图片进行等比例缩放
     @staticmethod
     def zoom_photo(image):
         width, height = image.size

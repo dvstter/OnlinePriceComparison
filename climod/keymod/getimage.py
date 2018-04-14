@@ -1,5 +1,6 @@
 from .tools import Tools
 
+# 图片获取器，用于从京东上获取一张关于商品的预览图
 class ImageGetter:
     def __init__(self):
         pass
