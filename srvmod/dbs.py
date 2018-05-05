@@ -22,6 +22,33 @@ class Database:
         self.day = datetime.date.today().day
         self.month = datetime.date.today().month
 
+    def category_exists(self, category):
+        if not self.conn:
+            return None
+
+        return self.conn.exists("category:" + category)
+
+    def add_category(self, category, url):
+        if not self.conn:
+            return None
+        try:
+            self.conn.set("category:"+category, url)
+            return True
+        except Exception as _:
+            return False
+
+    def get_category_url(self, category):
+        if not self.category_exists(category):
+            return None
+
+        return self.conn.get("category:"+category).decode("ascii")
+
+    def get_all_category_names(self):
+        if not self.conn:
+            return None
+
+        return [x.split(":")[1] for x in [x.decode("utf-8") for x in self.conn.keys("category:*")]]
+
     def item_exists(self, item):
         if not self.conn:
             return None
@@ -79,7 +106,35 @@ class Database:
 
         return [x.split(":")[1] for x in [x.decode("ascii") for x in self.conn.keys("prices:*")]]
 
-    def save_file(self, filename="dump.txt"):
+    def save_all(self):
+        self.save_categories_file()
+        self.save_items_file()
+
+    def restore_all(self):
+        self.restore_categories()
+        self.restore_items()
+
+    def save_categories_file(self, filename="categories.txt"):
+        file = open(filename, "w", encoding="utf-8")
+        for cat in self.get_all_category_names():
+            url = self.get_category_url(cat)
+            file.write("{}:{}\n".format(cat, url))
+
+        file.close()
+
+    def restore_categories(self, filename="categories.txt"):
+        with open(filename, "r", encoding="utf-8") as file:
+            for eachline in file.readlines():
+                if ":" not in eachline:
+                    continue
+
+                tmp = eachline.strip("\n").split(":")
+                cat = tmp[0]
+                url = "".join(tmp[1:])
+                self.add_category(cat, url)
+
+
+    def save_items_file(self, filename="items.txt"):
         file = open(filename, "wt")
         for item in self.get_all_ids():
             for price, update_time in self.get_all(item):
@@ -87,11 +142,11 @@ class Database:
 
         file.close()
 
-    def restore(self, filename="dump.txt"):
+    def restore_items(self, filename="items.txt"):
         with open(filename, "rt") as file:
             for eachline in file.readlines():
                 if ":" not in eachline:
-                    pass
+                    continue
 
                 item, price, update_time = eachline.strip("\n").split(":")
                 month, day = update_time.split("-")
