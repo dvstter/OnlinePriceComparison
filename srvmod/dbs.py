@@ -55,9 +55,12 @@ class Database:
 
         return self.conn.exists("prices:"+item) and self.conn.exists("update:"+item)
 
-    def specific_day_price_exists(self, item, month, day):
+    def specific_day_price_exists(self, item, month=None, day=None):
         if not self.item_exists(item):
             return None
+
+        month = int(month) if month else self.month
+        day = int(day) if day else self.day
 
         return "{}-{}".format(month, day) in self.get_update_time(item)
 
@@ -76,6 +79,21 @@ class Database:
         except Exception as _:
             print("Exception: Database.add_price")
             return False
+
+    """
+    如果指定日期（若为None，则为当日）的价格已经存在就不再添加价格
+    
+    :param item: 货品id
+    :param price: 价格
+    :param month: 月份（若为None，则为当月）
+    :param day: 日期（若为None，则为当日）
+    
+    :return None(连接错误等)/True(成功添加)/False(无法添加)
+    """
+    def add_price_another_day(self, item, price, month=None, day=None):
+        # this line code can't be "if not self.specific...", because the function may return None
+        if self.specific_day_price_exists(item, month, day) == False:
+            return self.add_price(item, price, month, day)
 
     def get_all(self, item):
         if not self.item_exists(item):
