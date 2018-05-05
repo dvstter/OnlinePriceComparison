@@ -57,7 +57,7 @@ class Database:
 
     def specific_day_price_exists(self, item, month=None, day=None):
         if not self.item_exists(item):
-            return None
+            return False
 
         month = int(month) if month else self.month
         day = int(day) if day else self.day
@@ -91,8 +91,7 @@ class Database:
     :return None(连接错误等)/True(成功添加)/False(无法添加)
     """
     def add_price_another_day(self, item, price, month=None, day=None):
-        # this line code can't be "if not self.specific...", because the function may return None
-        if self.specific_day_price_exists(item, month, day) == False:
+        if not self.specific_day_price_exists(item, month, day):
             return self.add_price(item, price, month, day)
 
     def get_all(self, item):
