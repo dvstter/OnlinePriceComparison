@@ -24,11 +24,20 @@ class DetailArea(Frame):
 
     # item为需要搜索价格的对象，通过该方法，更新平台价格区域
     def update_view(self, item):
+        # update price detail page
         self.__clear_prices()
         lowest_price = 100000
-        for platform, prices, link in self.__price_getter.get_prices(item):
+        skuids = None
+        for platform, results, link in self.__price_getter.get_prices(item):
+            print("platform: {}\nresults: {}\nlink: {}\n".format(platform, results, link))
+            prices = [x[1] for x in results]
+            skuids = [x[0] for x in results]
+            print(prices)
             self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
             lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
+
+        # update curve detail page
+        self.__curve.load(str(skuids[0]))
 
         return lowest_price
 
