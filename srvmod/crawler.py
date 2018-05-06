@@ -3,6 +3,13 @@ import requests
 import random
 import time
 import json
+import re
+import os
+from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import *
+from .proxy import Proxy
+from sklearn.externals import joblib
 from bs4 import BeautifulSoup
 from srvmod.dbs import Database
 import urllib3
@@ -19,11 +26,14 @@ class Crawler:
         self.httplib = requests.session()
         self.httplib.keep_alive = False
 
-        self.proxy_list = None
+        self.proxy_list = []
         self.proxies = None
 
         self.dbs = Database()
 
+        self.client = None
+
+        self.__init_selenium()
         self.__init_proxies()
 
     """
@@ -50,16 +60,22 @@ class Crawler:
     """
     def module_test(self):
         Crawler.Verbose = True
-        self.__update_category_items_price("http://list.jd.com/list.html?cat=12218,13581,13582")
+        self.__update_category_items_price_with_selenium("http://list.jd.com/list.html?cat=12218,13581,13582")
 
     """
-    从Proxy类中从网上搜集免费代理，因为没有找到好的免费代理，因此只有用自己的代理
+    获取代理，应该首先调用__init_proxies_online_free()获取免费的，再加入自己的代理
+    """
+    def __init_proxies(self):
+        #self.__init_proxies_online_free()
+        # use my own proxy
+        self.proxy_list.append(("127.0.0.1", 1087))
+
+    """
+    利用Proxy类从网上搜集免费代理，但是目前暂时无法找到合适的代理
     
     @return [(proxy_address1, proxy_port1), ...]
     """
-    def __init_proxies(self):
-        '''
-        # the free proxy website has been baned, so disabled these code
+    def __init_proxies_online_free(self):
         filename = "proxies.dat"
         if os.path.exists(filename):
             proxy_list = joblib.load(filename)
@@ -68,10 +84,6 @@ class Crawler:
             joblib.dump(proxy_list, filename, compress=3)
 
         self.proxy_list = proxy_list
-        '''
-
-        # use my own proxy
-        return [("127.0.0.1", 1087)]
 
     """
     从self.proxy_list中随机挑选一个代理，并切换代理
@@ -133,10 +145,67 @@ class Crawler:
 
         return results
 
+    """
+    将获取到的品类及链接存入数据库
+    
+    :param categories: [(品类名1,品类url1),...]可以指定自己的数据，如果为None，调用self.__get_categories()从网上获取
+    """
     def __update_categories_dbs(self, categories=None):
         categories = self.__get_categories() if not categories else categories
         for cat, url in categories:
             self.dbs.add_category(cat, url)
+
+    """
+    初始化没有窗口的Chrome客户端
+    """
+    def __init_selenium(self):
+        options = webdriver.ChromeOptions()
+        options.add_argument("headless")
+        self.client = webdriver.Chrome(chrome_options=options)
+
+    """
+    利用selenium更新价格，该方法不能单独调用，必须调用下面的__update_category_items_price_with_selenium
+    """
+    def __update_items_price_with_selenium(self):
+        # Todo: Added exception support for this function, and add exception process code on the next function
+        for each in self.client.find_elements_by_class_name("j-sku-item"):
+            price = float(each.find_element_by_class_name("J_price").text[1:])
+            skuid = each.get_attribute("data-sku")
+
+            self.dbs.add_price_another_day(skuid, price)
+            if Crawler.Verbose:
+                print("Added {} for price {}".format(skuid, price))
+    """
+    更新某一个品类的所有商品价格
+    """
+    def __update_category_items_price_with_selenium(self, cat_url):
+        if not self.client:
+            self.__init_selenium()
+
+        url = "{}&page=1&sort=sort_rank_asc&trans=1&JL=6_0_0#J_main".format(cat_url)
+        url = url.replace("&jth=i", "")
+        try:
+            self.client.get(url)
+        except TimeoutException:
+            print("Access {} timeout, change proxy.".format(url))
+
+        self.__update_items_price_with_selenium()
+
+        try:
+            while True:
+                time.sleep(random.randint(20, 50)/10.0)
+                # move to the next page and call the
+                next_page_btn = self.client.find_element_by_class_name("pn-next")
+                ActionChains(self.client).click(next_page_btn).perform()
+
+                if Crawler.Verbose:
+                    print("----------------------")
+                    print("Moved to page {}".format(re.findall(r"page=(\d+)", self.client.current_url)[0]))
+                    print("----------------------")
+
+                self.__update_items_price_with_selenium()
+        except NoSuchElementException:
+            print("Ended this category.")
 
     """
     获取某一品类某一页的所有商品和价钱并存入数据库
@@ -183,6 +252,12 @@ class Crawler:
 
         return pages_num
 
+    """
+    获取某一品类的所有商品id和价格，并存入数据库，是对__update_items_price()的更进一步的封装
+    
+    :param cat_url: 类型的url
+    :param wait_circle: 下一次发起链接的等待时间 
+    """
     def __update_category_items_price(self, cat_url, wait_circle=None):
         cur_page = 1
         pages_num = None
