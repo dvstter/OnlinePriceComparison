@@ -53,14 +53,14 @@ class Crawler:
             caturls = [x[1] for x in categories]
 
         for url in caturls:
-            self.__update_category_items_price(url)
+            self.__update_category_items_price_with_selenium(url)
 
     """
     用于单元测试
     """
     def module_test(self):
         Crawler.Verbose = True
-        self.__update_category_items_price_with_selenium("http://list.jd.com/list.html?cat=12218,13581,13582")
+        self.__update_category_items_price_with_selenium("http://list.jd.com/list.html?cat=670,671,2694")
 
     """
     获取代理，应该首先调用__init_proxies_online_free()获取免费的，再加入自己的代理
@@ -86,9 +86,25 @@ class Crawler:
         self.proxy_list = proxy_list
 
     """
-    从self.proxy_list中随机挑选一个代理，并切换代理
+    因为只有一个代理，所以调用此函数即可
     """
     def __switch_proxy(self):
+        if not len(self.proxy_list) == 1:
+            return
+
+        if not self.proxies:
+            host, port = self.proxy_list[0]
+            self.proxies = {
+                "http": "http://{}:{}".format(host, port),
+                "https": "http://{}:{}".format(host, port)
+            }
+        else:
+            self.proxies = None
+
+    """
+    从self.proxy_list中随机挑选一个代理，并切换代理
+    """
+    def __switch_proxy_randomly(self):
         try:
             ori_host, ori_port = self.proxies["http"].split(":")[1:]
             ori_host = ori_host[2:]
@@ -168,13 +184,29 @@ class Crawler:
     """
     def __update_items_price_with_selenium(self):
         # Todo: Added exception support for this function, and add exception process code on the next function
-        for each in self.client.find_elements_by_class_name("j-sku-item"):
-            price = float(each.find_element_by_class_name("J_price").text[1:])
-            skuid = each.get_attribute("data-sku")
 
-            self.dbs.add_price_another_day(skuid, price)
-            if Crawler.Verbose:
-                print("Added {} for price {}".format(skuid, price))
+        time.sleep(3) # wait for javascript load all the prices
+        self.client.execute_script("es = document.getElementsByClassName('J_price');for (var i=0; i!=es.length; i++) {es[i].style.display='block';}")
+        for each in self.client.find_elements_by_class_name("j-sku-item"):
+            try:
+                price = float(re.findall(r"\d+\.\d{2}", each.find_element_by_class_name("J_price").text)[0])
+                skuid = each.get_attribute("data-sku")
+
+                self.dbs.add_price_another_day(skuid, price)
+                if Crawler.Verbose:
+                    print("Added {} for price {}".format(skuid, price))
+            except Exception as e:
+                print("----------------------")
+                print("Exception arised.")
+                print(e)
+                print("----------------------")
+
+                file = open("exception.txt", "w", encoding="utf-8")
+                file.write(self.client.page_source)
+                file.close()
+                continue
+        return True
+
     """
     更新某一个品类的所有商品价格
     """
@@ -184,12 +216,19 @@ class Crawler:
 
         url = "{}&page=1&sort=sort_rank_asc&trans=1&JL=6_0_0#J_main".format(cat_url)
         url = url.replace("&jth=i", "")
+
+        if Crawler.Verbose:
+            print("----------------------")
+            print("Started form url:{}".format(url))
+            print("----------------------")
+
         try:
             self.client.get(url)
         except TimeoutException:
             print("Access {} timeout, change proxy.".format(url))
 
-        self.__update_items_price_with_selenium()
+        if not self.__update_items_price_with_selenium():
+            return
 
         try:
             while True:
@@ -203,9 +242,13 @@ class Crawler:
                     print("Moved to page {}".format(re.findall(r"page=(\d+)", self.client.current_url)[0]))
                     print("----------------------")
 
-                self.__update_items_price_with_selenium()
+                if not self.__update_items_price_with_selenium():
+                    return
         except NoSuchElementException:
+            print("----------------------")
             print("Ended this category.")
+            print("----------------------")
+            return
 
     """
     获取某一品类某一页的所有商品和价钱并存入数据库
