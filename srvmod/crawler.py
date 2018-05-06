@@ -42,18 +42,33 @@ class Crawler:
     def run(self):
         caturls = []
         all_categories = self.dbs.get_all_category_names()
+        cat_total = 0
+        cat_count = 0
 
         if all_categories:
+            cat_total = len(all_categories)
             for cat in all_categories:
                 url = self.dbs.get_category_url(cat)
                 caturls.append(url)
         else:
             categories = self.__get_categories()
+            cat_total = len(categories)
             self.__update_categories_dbs(categories)
             caturls = [x[1] for x in categories]
 
+        # Todo: everything about count needed to be deleted, this is just for jump over
+        count = 140
         for url in caturls:
+            count -= 1
+            if count > 0:
+                continue
+
             self.__update_category_items_price_with_selenium(url)
+            cat_count += 1
+            if Crawler.Verbose:
+                print("----------------------")
+                print("Finished {} for total {}".format(cat_count, cat_total))
+                print("----------------------")
 
     """
     用于单元测试
