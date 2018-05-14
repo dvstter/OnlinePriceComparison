@@ -23,8 +23,6 @@ class Crawler:
             "user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",
             "accept-encoding":"gzip, deflate, sdch"
         }
-        self.httplib = requests.session()
-        self.httplib.keep_alive = False
 
         self.proxy_list = []
         self.proxies = None
@@ -42,7 +40,6 @@ class Crawler:
     def run(self):
         caturls = []
         all_categories = self.dbs.get_all_category_names()
-        cat_total = 0
         cat_count = 0
 
         if all_categories:
@@ -192,7 +189,7 @@ class Crawler:
     def __init_selenium(self):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
-        self.client = webdriver.Chrome(chrome_options=options)
+        self.client = webdriver.Chrome(executable_path="/usr/local/bin/chromedriver", chrome_options=options)
 
     """
     利用selenium更新价格，该方法不能单独调用，必须调用下面的__update_category_items_price_with_selenium
@@ -207,7 +204,9 @@ class Crawler:
                 price = float(re.findall(r"\d+\.\d{2}", each.find_element_by_class_name("J_price").text)[0])
                 skuid = each.get_attribute("data-sku")
 
-                self.dbs.add_price_another_day(skuid, price)
+                # Todo: replace this line's code
+                #self.dbs.add_price_another_day(skuid, price)
+                self.dbs.add_price(skuid, price, 5, 9)
                 if Crawler.Verbose:
                     print("Added {} for price {}".format(skuid, price))
             except Exception as e:

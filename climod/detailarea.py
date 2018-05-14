@@ -28,16 +28,28 @@ class DetailArea(Frame):
         self.__clear_prices()
         lowest_price = 100000
         skuids = None
-        for platform, results, link in self.__price_getter.get_prices(item):
-            print("platform: {}\nresults: {}\nlink: {}\n".format(platform, results, link))
-            prices = [x[1] for x in results]
-            skuids = [x[0] for x in results]
-            print(prices)
-            self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
-            lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
+
+        url, results = self.__price_getter.parse_jd(item)
+        platform = "京东"
+        prices = [x[1] for x in results]
+        skuids = [x[0] for x in results]
+        self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), url)
+
+        url, prices = self.__price_getter.parse_tb(item)
+        platform = "淘宝"
+        self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), url)
+
+        #for platform, results, link in self.__price_getter.get_prices(item):
+        #    prices = [x[1] for x in results]
+        #    skuids = [x[0] for x in results]
+        #    self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), link)
+        #    lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
 
         # update curve detail page
         self.__curve.load(str(skuids[0]))
+
+        # update comment detail page
+        self.__comments.fetch_and_update_comments(str(skuids[0]))
 
         return lowest_price
 

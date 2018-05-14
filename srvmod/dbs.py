@@ -131,7 +131,7 @@ class Database:
         self.restore_categories()
         self.restore_items()
 
-    def save_categories_file(self, filename="categories.txt"):
+    def save_categories_file(self, filename="resource/categories.txt"):
         file = open(filename, "w", encoding="utf-8")
         for cat in self.get_all_category_names():
             url = self.get_category_url(cat)
@@ -139,7 +139,7 @@ class Database:
 
         file.close()
 
-    def restore_categories(self, filename="categories.txt"):
+    def restore_categories(self, filename="resource/categories.txt"):
         with open(filename, "r", encoding="utf-8") as file:
             for eachline in file.readlines():
                 if ":" not in eachline:
@@ -151,7 +151,7 @@ class Database:
                 self.add_category(cat, url)
 
 
-    def save_items_file(self, filename="items.txt"):
+    def save_items_file(self, filename="resource/items.txt"):
         file = open(filename, "wt")
         for item in self.get_all_ids():
             for price, update_time in self.get_all(item):
@@ -159,7 +159,7 @@ class Database:
 
         file.close()
 
-    def restore_items(self, filename="items.txt"):
+    def restore_items(self, filename="resource/items.txt"):
         with open(filename, "rt") as file:
             for eachline in file.readlines():
                 if ":" not in eachline:

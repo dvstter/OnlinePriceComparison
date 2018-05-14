@@ -11,14 +11,27 @@ class PricesGetter:
         requests.packages.urllib3.disable_warnings()
 
         #self.supported = {"jd":"京东", "tb":"淘宝", "dd":"当当", "tm":"天猫", "ymx":"亚马逊"}
-        self.supported = {"jd":"京东"}
+        self.supported = {"jd":"京东", "tb":"淘宝"}
 
+    """
     def get_prices(self, item):
         # 依次调用parse_jd()、parse_tb()等方法，从对应的电商网站上获取价格数据
         for func, platform in self.supported.items():
             f = getattr(type(self), "parse_" + func)
             url, results = f(item)
             yield platform, results, url
+
+    """
+
+    # Todo: This method needed to be reconstructed
+    @staticmethod
+    def parse_tb(item):
+        url = "https://s.taobao.com/search"
+        payload = {"q": item, "s": "1", "ie": "utf8"}
+        resp, _ = Tools.request_data(url, payload)
+        prices = [float(x) for x in re.findall(r'"view_price":"([0-9]+\.[0-9]{2})"', resp.text, re.I)]
+        prices.sort()
+        return url, prices
 
     @staticmethod
     def parse_jd(item):
@@ -71,16 +84,6 @@ class PricesGetter:
             tmp = each.strong.i.contents
             if len(tmp) == 1:
                 prices.append(float(tmp[0]))
-        prices.sort()
-
-        return url, payload, prices
-
-    @staticmethod
-    def deprecated_parse_tb(item):
-        url = "https://s.taobao.com/search"
-        payload = {"q":item, "s":"1", "ie":"utf8"}
-        resp, _ = Tools.request_data(url, payload)
-        prices = [float(x) for x in re.findall(r'"view_price":"([0-9]+\.[0-9]{2})"', resp.text, re.I)]
         prices.sort()
 
         return url, payload, prices
