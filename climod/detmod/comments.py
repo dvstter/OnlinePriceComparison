@@ -48,7 +48,7 @@ class Comments(Frame):
         url = "http://club.jd.com/productpage/p-{}-s-0-t-3-p-0.html".format(item)
         tmp = json.loads(requests.get(url).text)
         for each in tmp["comments"]:
-            print(each["content"])
+            #print(each["content"])
             self.add_comment(each["content"])
 
     def __generate_str(self):

@@ -26,18 +26,20 @@ class DetailArea(Frame):
     def update_view(self, item):
         # update price detail page
         self.__clear_prices()
-        lowest_price = 100000
-        skuids = None
 
         url, results = self.__price_getter.parse_jd(item)
         platform = "京东"
         prices = [x[1] for x in results]
         skuids = [x[0] for x in results]
         self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), url)
+        l1 = prices[0]
 
         url, prices = self.__price_getter.parse_tb(item)
         platform = "淘宝"
         self.__add_price(platform, str(prices[0]) + "-" + str(prices[-1]), url)
+        l2 = prices[0]
+
+        lowest_price = min(int(l1), int(l2))
 
         #for platform, results, link in self.__price_getter.get_prices(item):
         #    prices = [x[1] for x in results]
@@ -46,7 +48,7 @@ class DetailArea(Frame):
         #    lowest_price = prices[0] if prices[0] < lowest_price else lowest_price
 
         # update curve detail page
-        self.__curve.load(str(skuids[0]))
+        self.__curve.load(str(skuids[0]), normal_price=l1)
 
         # update comment detail page
         self.__comments.fetch_and_update_comments(str(skuids[0]))
