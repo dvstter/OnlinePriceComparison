@@ -4,6 +4,7 @@ import re
 import time
 from selenium import webdriver
 from .tools import Tools
+import urllib.parse
 
 # 价格获取器
 class PricesGetter:
@@ -31,7 +32,7 @@ class PricesGetter:
         resp, _ = Tools.request_data(url, payload)
         prices = [float(x) for x in re.findall(r'"view_price":"([0-9]+\.[0-9]{2})"', resp.text, re.I)]
         prices.sort()
-        return url, prices
+        return url + urllib.parse.urlencode(payload), prices
 
     @staticmethod
     def parse_jd(item):

@@ -1,5 +1,5 @@
-from tkinter import *
 from tkinter.ttk import *
+from selenium import webdriver
 
 # 平台价格展示区域，为一个表状
 class PricesTable(Frame):
@@ -9,6 +9,7 @@ class PricesTable(Frame):
 
         self.__table = None # 价格表，四列，分别为编号、电商平台名、价格区间、链接
         self.__data = []
+        self.__client = None
 
         self.__create_widgets()
         self.__place_widgets()
@@ -35,8 +36,7 @@ class PricesTable(Frame):
             self.__table.grid_forget()
 
         num_rows = len(self.__data)
-        self.__table = Treeview(self, show="headings", columns=("a", "b", "c", "d"), height=num_rows,
-                                selectmode="none")
+        self.__table = Treeview(self, show="headings", columns=("a", "b", "c", "d"), height=num_rows)
 
         for x in ["a", "b", "c"]:
             self.__table.column(x, anchor="center")
@@ -49,6 +49,19 @@ class PricesTable(Frame):
         self.__table.heading("b", text="Platform")
         self.__table.heading("c", text="Price")
         self.__table.heading("d", text="Link")
+
+        self.__table.bind("<Double-Button-1>", self.__on_click)
+
+    def __on_click(self, event):
+        item_id = event.widget.focus()
+        item = event.widget.item(item_id)
+        values = item['values']
+        url = values[3]
+        if not self.__client:
+            self.__client = webdriver.Chrome()
+            self.__client.get(url)
+        else:
+            self.__client.get(url)
 
     def __create_widgets(self):
         self.__init_table()
