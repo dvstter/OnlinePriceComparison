@@ -66,13 +66,13 @@ class DetailArea(Frame):
     def __create_widgets(self):
         self.__note = Notebook(self)
         self.__prices = PricesTable(self)
-        self.__note.add(self.__prices, text="Prices")
+        self.__note.add(self.__prices, text="价格")
 
         self.__curve = PriceCurve(self)
-        self.__note.add(self.__curve, text="Curve")
+        self.__note.add(self.__curve, text="曲线")
 
         self.__comments = Comments(self)
-        self.__note.add(self.__comments, text="Comments")
+        self.__note.add(self.__comments, text="评论")
 
     def __place_widgets(self):
         assert self.__note is not None

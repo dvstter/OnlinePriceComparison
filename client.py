@@ -7,6 +7,6 @@ class Client(Tk):
 
 if __name__ == "__main__":
     client = Client()
-    client.title("Price Comparison")
+    client.title("比价程序")
     area = GlobalArea(client)
     client.mainloop()

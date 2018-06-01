@@ -26,7 +26,7 @@ class SearchArea(Frame):
 
     def __create_widgets(self):
         self.__input = Entry(self)
-        self.__confirm = Button(self, text="Search", command=self.search_item)
+        self.__confirm = Button(self, text="搜索", command=self.search_item)
 
     def __place_widgets(self):
         assert self.__input is not None

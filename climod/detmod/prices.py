@@ -46,9 +46,9 @@ class PricesTable(Frame):
         self.__table.column("c", width=140, stretch=False)
 
         self.__table.heading("a", text="#")
-        self.__table.heading("b", text="Platform")
-        self.__table.heading("c", text="Price")
-        self.__table.heading("d", text="Link")
+        self.__table.heading("b", text="平台")
+        self.__table.heading("c", text="价格")
+        self.__table.heading("d", text="链接")
 
         self.__table.bind("<Double-Button-1>", self.__on_click)
 
