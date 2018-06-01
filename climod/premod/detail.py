@@ -12,7 +12,7 @@ class DetailInfo(Frame):
         self.__place_widgets()
 
     def __create_widgets(self):
-        self.__details = Label(self, text="Processor: i7 2.7ghz")
+        self.__details = Label(self, text="")
 
     def __place_widgets(self):
         self.__details.grid(row=0, column=0, sticky="w")
